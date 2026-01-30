@@ -2,13 +2,17 @@ import streamlit as st
 import joblib
 import pandas as pd
 import numpy as np
+import os
 
 
 # =========================
-# Load Model
+# Load Model Safely
 # =========================
 
-model = joblib.load("desics.pkl")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "desics.pkl")
+
+model = joblib.load(MODEL_PATH)
 
 
 # =========================
@@ -21,20 +25,20 @@ st.set_page_config(
 )
 
 st.title("❤️ Heart Disease Prediction App")
-st.write("Enter Patient Details")
+st.write("Enter Patient Details to Predict 10-Year Heart Disease Risk")
 
 
 # =========================
 # Input Fields
 # =========================
 
-male = st.selectbox("Male (1 = Yes, 0 = No)", [0, 1])
+male = st.selectbox("Gender (1 = Male, 0 = Female)", [0, 1])
 
-age = st.number_input("Age", 1, 120, 40)
+age = st.number_input("Age", min_value=1, max_value=120, value=40)
 
 currentSmoker = st.selectbox("Current Smoker (1 = Yes, 0 = No)", [0, 1])
 
-cigsPerDay = st.number_input("Cigarettes Per Day", 0, 100, 0)
+cigsPerDay = st.number_input("Cigarettes Per Day", min_value=0, max_value=100, value=0)
 
 BPMeds = st.selectbox("BP Medicine (1 = Yes, 0 = No)", [0, 1])
 
@@ -44,21 +48,21 @@ prevalentHyp = st.selectbox("Hypertension (1 = Yes, 0 = No)", [0, 1])
 
 diabetes = st.selectbox("Diabetes (1 = Yes, 0 = No)", [0, 1])
 
-totChol = st.number_input("Total Cholesterol", 100, 500, 200)
+totChol = st.number_input("Total Cholesterol", min_value=100, max_value=500, value=200)
 
-sysBP = st.number_input("Systolic BP", 80, 250, 120)
+sysBP = st.number_input("Systolic BP", min_value=80, max_value=250, value=120)
 
-diaBP = st.number_input("Diastolic BP", 50, 150, 80)
+diaBP = st.number_input("Diastolic BP", min_value=50, max_value=150, value=80)
 
-BMI = st.number_input("BMI", 10.0, 60.0, 22.0)
+BMI = st.number_input("BMI", min_value=10.0, max_value=60.0, value=22.0)
 
-heartRate = st.number_input("Heart Rate", 40, 200, 75)
+heartRate = st.number_input("Heart Rate", min_value=40, max_value=200, value=75)
 
-glucose = st.number_input("Glucose", 50, 400, 100)
+glucose = st.number_input("Glucose Level", min_value=50, max_value=400, value=100)
 
 
 # =========================
-# Create DataFrame
+# Create Input DataFrame
 # =========================
 
 input_data = pd.DataFrame([[
@@ -96,13 +100,10 @@ input_data = pd.DataFrame([[
 
 
 # =========================
-# Safety Check (No NaN)
+# Ensure No NaN Values
 # =========================
 
-# Force convert to float
 input_data = input_data.astype(float)
-
-# Fill any accidental NaN with 0
 input_data.fillna(0, inplace=True)
 
 
@@ -128,4 +129,4 @@ if st.button("Predict"):
 # =========================
 
 st.markdown("---")
-st.markdown("Developed by Arun | Heart Disease ML App")
+st.markdown("Developed by Arun | Heart Disease ML Predictor")
