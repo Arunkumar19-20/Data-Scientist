@@ -1,96 +1,65 @@
 import streamlit as st
-import numpy as np
 import joblib
-import os
+import numpy as np
 
-# Page setup
-st.set_page_config(
-    page_title="Credit Card Fraud Detection",
-    page_icon="💳",
-    layout="centered"
-)
 
 # Load Model
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-model = joblib.load(os.path.join(BASE_DIR, "model.pkl"))
+model = joblib.load("svm_creditcard_model.pkl")
 
 
-# Feature names (from Credit Card Dataset)
-feature_names = [
-    "Transaction Time (seconds)",
-    "Transaction Velocity",
-    "Location Risk Score",
-    "Merchant Risk Level",
-    "Transaction Frequency",
-    "Device Trust Score",
-    "IP Risk Level",
-    "Geo Distance",
-    "Spending Pattern Score",
-    "Amount Deviation",
-    "User Behavior Score",
-    "Transaction Consistency",
-    "Account Age Impact",
-    "Fraud History Score",
-    "Stability Index",
-    "Velocity Anomaly",
-    "Usage Pattern Shift",
-    "Login Risk Score",
-    "Merchant Trust Index",
-    "Device Change Score",
-    "Session Risk",
-    "Browser Fingerprint Score",
-    "Purchase Type Risk",
-    "Region Risk Index",
-    "Spending Trend",
-    "Credit Utilization",
-    "Network Risk Score",
-    "Anomaly Probability",
-    "Transaction Amount"
-]
+# App Settings
+st.set_page_config(page_title="Credit Card Fraud Detection")
+
+st.title("💳 Credit Card Fraud Detection (SVM)")
+st.write("Enter transaction details to predict fraud")
 
 
-# Title
-st.title("💳 Credit Card Fraud Detection using SVM")
+# Input Features (Renamed)
+st.subheader("Enter Transaction Details")
 
-st.write("""
-This application predicts whether a credit card transaction is
-**Fraudulent or Normal** using a trained SVM model.
-""")
+Time = st.number_input(
+    "Transaction Time (Seconds)",
+    value=10000.0
+)
 
+Pattern_Score = st.number_input(
+    "Transaction Pattern Score",
+    value=0.0
+)
 
-# Input Section
-st.header("📥 Enter Transaction Details")
+Behavior_Index = st.number_input(
+    "Spending Behavior Index",
+    value=0.0
+)
 
-inputs = []
+Risk_Level = st.number_input(
+    "Risk Signal Level",
+    value=0.0
+)
 
-for name in feature_names:
-    value = st.number_input(
-        name,
-        value=0.0,
-        format="%.6f"
-    )
-    inputs.append(value)
+Amount = st.number_input(
+    "Transaction Amount (₹)",
+    value=100.0
+)
 
 
 # Predict Button
-if st.button("🔍 Predict"):
+if st.button("Predict"):
 
-    # Convert to numpy array
-    input_data = np.array(inputs).reshape(1, -1)
+    # Input in SAME order as training
+    input_data = np.array([[
+        Time,
+        Pattern_Score,   # V1
+        Behavior_Index,  # V2
+        Risk_Level,      # V3
+        Amount
+    ]])
 
-    # Prediction
+    # Predict
     prediction = model.predict(input_data)[0]
 
-    # Output
-    st.header("📤 Prediction Result")
-
-    if prediction == 1:
-        st.error("⚠️ Fraud Transaction Detected")
+    # Result
+    if prediction == 0:
+        st.success("✅ Transaction is NORMAL (Not Fraud)")
     else:
-        st.success("✅ Normal Transaction")
-
-
-# Footer
-st.markdown("---")
-st.markdown("Developed using SVM & Streamlit")
+        st.error("🚨 Transaction is FRAUD")
